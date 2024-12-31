@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import Trending from './Trending'
 import TopRestaurants from './TopRestaurants'
+import OnlineFoodDelivery from './OnlineFoodDelivery'
 
 
 
 function Body() {
     const [topResdata, setTopResData] = useState([])
     const [trending , setTrending] = useState([])
+
 
     async function fetchData() {
                     const data = await fetch("https://www.swiggy.com/dapi/restaurants/list/v5?lat=28.65200&lng=77.16630&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING");
@@ -29,8 +31,9 @@ function Body() {
         <div className='w-[80%] mx-auto  mt-5 overflow-hidden' >
             <Trending data={trending}/>
             <hr className='border mt-5 '></hr>
-            <TopRestaurants data={topResdata  }/>
+            <TopRestaurants data={topResdata}/>
             <hr className='border mt-5 mb-3 '></hr>
+            <OnlineFoodDelivery data={topResdata}/>
         </div>
             
     </div>
