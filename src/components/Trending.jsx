@@ -1,22 +1,22 @@
 import React ,{useState , useEffect} from 'react'
 
-function Trending() {
+function Trending({data}) {
     const [value , setValue] = useState(0)
-     const [data ,setData] = useState([])
-    
-        async function fetchData() {
-            const data = await fetch("https://www.swiggy.com/dapi/restaurants/list/v5?lat=28.65200&lng=77.16630&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING");
-            const result = await data.json();
-//             console.log(result?.data?.cards[0]?.card?.card?.gridElements
-// ?.infoWithStyle?.info);
-            setData(result?.data?.cards[0]?.card?.card?.gridElements
-              ?.infoWithStyle?.info)
+
+    //  const [data ,setData] = useState([])
+//         async function fetchData() {
+//             const data = await fetch("https://www.swiggy.com/dapi/restaurants/list/v5?lat=28.65200&lng=77.16630&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING");
+//             const result = await data.json();
+// //             console.log(result?.data?.cards[0]?.card?.card?.gridElements
+// // ?.infoWithStyle?.info);
+//             setData(result?.data?.cards[0]?.card?.card?.gridElements
+//               ?.infoWithStyle?.info)
             
-        }
+//         }
         
-        useEffect(()=>{
-            fetchData()
-        },[])
+//         useEffect(()=>{
+//             fetchData()
+//         },[])
 
     function handleNext(){
        value <= 162 ?  setValue((prev) => prev + 20) : ""
