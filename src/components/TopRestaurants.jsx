@@ -2,6 +2,7 @@ import React ,{useState , useEffect} from 'react'
 import RestaurantCard from "./RestaurantCard"
 
 function TopRestaurants({data}) {
+//  console.log(data);
  
   
      const [value , setValue] = useState(0)
@@ -59,10 +60,10 @@ function TopRestaurants({data}) {
                   style={{translate: `-${value}%`}}
                   className='flex  gap-6 mt-6 w-full duration-200' >
                     
-                    {data.map(({info}) =>(
+                    {data.map(({info , cta : {link}}) =>(
                         <div className='hover:scale-95 duration-200 '
                             key={info.id}>
-                               <RestaurantCard {...info}/>      
+                               <RestaurantCard {...info} link={link}/>      
                         </div>
                        
                     ))}

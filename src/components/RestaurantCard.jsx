@@ -1,10 +1,11 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function RestaurantCard(info) {
-//   console.log(info);
+  // console.log(info.link.split("/")[5]);
 
   return (
-    <>
+    <Link to={`/restaurantMenu/${info.link.split("/").at(-1)}`}>
       <div className="min-w-[250px] h-[182px] relative">
         <img
           className="w-full h-full object-cover rounded-3xl"
@@ -34,7 +35,7 @@ function RestaurantCard(info) {
           {info?.locality}
         </p>
       </div>
-    </>
+    </Link>
   );
 }
 export default RestaurantCard;
