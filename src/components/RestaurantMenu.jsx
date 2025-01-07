@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-key */
 import React, { act, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
@@ -10,6 +11,7 @@ function RestaurantMenu() {
   const [resInfo , setResInfo] = useState([])
   const [discountData , setDiscountData] = useState([])
   const [menuData , setMenuData] = useState([])
+  const [currIdx , setCurrIdx] = useState(null)
  
   
 
@@ -20,7 +22,7 @@ async function fetchMenu(){
   setMenuName(res?.data?.cards[0]?.card?.card?.text)
   setResInfo(res?.data?.cards[2]?.card?.card?.info)
   setDiscountData(res?.data?.cards[3]?.card?.card?.gridElements?.infoWithStyle?.offers)
-  let actualMenu = (res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards).filter(data => data.card?.card?.itemCards)
+  let actualMenu = (res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards).filter((data) => data.card?.card?.itemCards || data.card?.card?.categories)
   console.log(actualMenu);
   
  setMenuData(actualMenu)
@@ -38,6 +40,11 @@ async function fetchMenu(){
  }
  function handlePrev(){
     value == 0 ? "" : setValue((prev) => prev - 20)
+ }
+
+ function toggle(i){
+  setCurrIdx(i === currIdx ? null : i)
+  
  }
 
   return (
@@ -122,8 +129,8 @@ async function fetchMenu(){
                   </div>
                   <div>
                     {
-                      menuData.map(({card : {card : {itemCards , title}}})=>(
-                        <h1>{title}</h1>
+                      menuData.map(({card : {card }})=>( 
+                        <MenuCard card={card}/>
                       ))
                     }
                   </div>
@@ -132,6 +139,62 @@ async function fetchMenu(){
             
       </div>
     </div> 
+  )
+}
+
+function MenuCard({card}){
+  const {itemCards,title} = card;
+
+  let hello = false
+  if(card["@type"]){
+    hello = true
+  }
+ 
+ const [isOpen , setIsOpen] = useState(hello)
+
+  function ToggleDropdown(){
+    setIsOpen((prev) => !prev)
+  }
+
+  if(card.itemCards) {
+     return (
+  <div className='m-3'>
+    <div className='flex justify-between'>
+       <h1>{title} </h1>
+       <i className="fi text-xl fi-rr-angle-small-up" onClick={ToggleDropdown}></i>
+    </div>
+    {isOpen && <MenuCardDetails itemCards={itemCards}/>}
+    
+
+  </div>
+  )
+  } else {
+    const {categories , title} = card;
+    return (
+      
+      <div>
+        <h1>{title}</h1>
+        {categories.map((data)=>(
+          <MenuCard card={data}/>
+        ))}
+
+      </div>
+    )
+  }
+
+ 
+}
+
+function MenuCardDetails({itemCards}){
+  return(
+    <>
+    {/* <h1>{console.log(itemCards)}</h1> */}
+    {
+      itemCards.map((card )=>(
+        <h1>{card?.card?.info?.name}</h1>
+      ))
+    }
+    </>
   )
 }
 
@@ -151,3 +214,26 @@ function Discount({data : {info : {couponCode,header,offerLogo}}} , id){
 }
 
 export default RestaurantMenu
+
+
+
+
+
+    // <div>
+    //                         <div className='flex justify-between'>
+    //                           <h1>{title} ({itemCards.length}) </h1>
+    //                           <i className="fi text-xl fi-rr-angle-small-up" onClick={()=> toggle(i)}></i>
+    //                         </div>
+    //                         {
+    //                           currIdx === i && 
+    //                           <div className='m-6'>
+    //                             {
+    //                               itemCards.map(({card : {info }})=> (
+    //                                 <h1>{info?.name}</h1>
+    //                             ))
+    //                             }
+    //                           </div>
+    //                         }
+                            
+                          
+    //                   </div>
