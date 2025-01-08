@@ -1,7 +1,13 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable react/jsx-key */
 import React, { act, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
+
+let veg =
+    "https://www.pngkey.com/png/detail/261-2619381_chitr-veg-symbol-svg-veg-and-non-veg.png";
+let nonVeg =
+    "https://www.kindpng.com/picc/m/151-1515155_veg-icon-png-non-veg-symbol-png-transparent.png";
 function RestaurantMenu() {
   const {id} = useParams()
   // console.log(id?.split("rest").at(1));
@@ -10,6 +16,7 @@ function RestaurantMenu() {
   const [menuName , setMenuName] = useState([])
   const [resInfo , setResInfo] = useState([])
   const [discountData , setDiscountData] = useState([])
+  const [topPicksData, setTopPicksData] = useState({})
   const [menuData , setMenuData] = useState([])
   const [currIdx , setCurrIdx] = useState(null)
  
@@ -18,14 +25,15 @@ function RestaurantMenu() {
 async function fetchMenu(){
   const data = await fetch(`https://cors-by-codethread-for-swiggy.vercel.app/cors/dapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=18.9690247&lng=72.8205292&restaurantId=${mainId}&catalog_qa=undefined&submitAction=ENTER`)
   const res = await data.json()
-  // console.log(res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards[1]?.card?.card?.itemCards);
+  // console.log(res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards);
   setMenuName(res?.data?.cards[0]?.card?.card?.text)
   setResInfo(res?.data?.cards[2]?.card?.card?.info)
   setDiscountData(res?.data?.cards[3]?.card?.card?.gridElements?.infoWithStyle?.offers)
   let actualMenu = (res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards).filter((data) => data.card?.card?.itemCards || data.card?.card?.categories)
-  console.log(actualMenu);
+  // console.log(actualMenu);
   
  setMenuData(actualMenu)
+ setTopPicksData((res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards).filter((data)=>data?.card?.card?.title == "Top Picks"))
   
 }
 
@@ -158,22 +166,24 @@ function MenuCard({card}){
 
   if(card.itemCards) {
      return (
+      <>
   <div className='m-3'>
     <div className='flex justify-between'>
-       <h1>{title} </h1>
-       <i className="fi text-xl fi-rr-angle-small-up" onClick={ToggleDropdown}></i>
+       <h1 className={'font-bold text-'+ (card["@type"] ? "xl" : "base")}>{title} </h1>
+       <i className={"fi text-xl fi-rr-angle-small-" + (isOpen ? "up" : "down")} onClick={ToggleDropdown}></i>
     </div>
-    {isOpen && <MenuCardDetails itemCards={itemCards}/>}
+    {isOpen && <DetailMenu itemCards={itemCards}/>}
     
-
   </div>
+  <hr className={"my-4 border-"+(card["@type"] ? "[7px]" : "[5px]")}></hr>
+  </>
   )
   } else {
     const {categories , title} = card;
     return (
       
       <div>
-        <h1>{title}</h1>
+        <h1 className='font-bold text-xl'>{title}</h1>
         {categories.map((data)=>(
           <MenuCard card={data}/>
         ))}
@@ -185,16 +195,40 @@ function MenuCard({card}){
  
 }
 
-function MenuCardDetails({itemCards}){
+function DetailMenu({itemCards}){
   return(
     <>
-    {/* <h1>{console.log(itemCards)}</h1> */}
-    {
-      itemCards.map((card )=>(
-        <h1>{card?.card?.info?.name}</h1>
-      ))
-    }
+    <div className='my-5'>
+      {itemCards.map(({ card: { info: { name, defaultPrice, price, itemAttribute: { vegClassifier }, ratings: { aggregatedRating: { ratingCountV2, rating } }, imageId, description } } }) => {
+        const [ismore , setIsmore] = useState(false)
+        let trimDes = description.substring(0,130) + "..."
+        return (
+        <>
+          <div className='w-full flex justify-between  min-h-[182px]'>
+            <div className='w-[70%]'>
+              <img className="w-5 rounded-sm" src={vegClassifier == "VEG" ? veg : nonVeg} alt="" srcSet="" />
+              <h2 className="font-bold text-lg">{name}</h2>
+              <p className="font-bold text-lg">
+                ₹{defaultPrice / 100 || price / 100}{" "}
+              </p>
+              <div className="flex items-center gap-1"> <i className={"fi mt-1 text-xl fi-ss-star"}></i> <span>  {rating} ({ratingCountV2})  </span> </div>
+              {description.length > 140 ? <div>
+                    <span className=''>{ismore ? description : trimDes}</span>
+                    <button className='font-bold'onClick={()=>setIsmore(!ismore)}>{ismore ? "less" : "more"}</button>
+                </div>  : <span className=''>{description}</span>}
+            </div>
+            <div className='w-[20%] relative'>
+              <img className="rounded-xl aspect-square" src={"https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,c_fit/" + imageId} alt="" />
+              <button className='bg-white absolute bottom-[-10px] text-lg text-green-700'>Add</button>
+            </div>
+          </div>
+        </>
+
+      )})}
+    </div>
+    <hr className="my-5 " />
     </>
+    
   )
 }
 
