@@ -30,11 +30,11 @@ async function fetchMenu(){
   setResInfo(res?.data?.cards[2]?.card?.card?.info)
   setDiscountData(res?.data?.cards[3]?.card?.card?.gridElements?.infoWithStyle?.offers)
   let actualMenu = (res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards).filter((data) => data.card?.card?.itemCards || data.card?.card?.categories)
-  // console.log(actualMenu);
+  
   
  setMenuData(actualMenu)
- setTopPicksData((res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards).filter((data)=>data?.card?.card?.title == "Top Picks"))
-  
+ setTopPicksData((res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards).filter((data)=>data?.card?.card?.title == "Top Picks")[0])
+  console.log(res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards);
 }
 
   useEffect(()=> {
@@ -136,6 +136,7 @@ async function fetchMenu(){
                         <i className={"fi fi-rr-search absolute top-3 right-4"}></i>
                   </div>
                   <div>
+                    <p>top picks</p>
                     {
                       menuData.map(({card : {card }})=>( 
                         <MenuCard card={card}/>
@@ -149,6 +150,8 @@ async function fetchMenu(){
     </div> 
   )
 }
+
+
 
 function MenuCard({card}){
   const {itemCards,title} = card;
@@ -199,41 +202,44 @@ function DetailMenu({itemCards}){
   return(
     <>
     <div className='my-5'>
-      {itemCards.map(({ card: { info: { name, defaultPrice, price, itemAttribute: { vegClassifier }, ratings: { aggregatedRating: { ratingCountV2, rating } }, imageId, description } } }) => {
-        const [ismore , setIsmore] = useState(false)
-        let trimDes = description.substring(0,130) + "..."
-        return (
-        <>
-          <div className='w-full flex justify-between  min-h-[182px]'>
-            <div className='w-[70%]'>
-              <img className="w-5 rounded-sm" src={vegClassifier == "VEG" ? veg : nonVeg} alt="" srcSet="" />
-              <h2 className="font-bold text-lg">{name}</h2>
-              <p className="font-bold text-lg">
-                ₹{defaultPrice / 100 || price / 100}{" "}
-              </p>
-              <div className="flex items-center gap-1"> <i className={"fi mt-1 text-xl fi-ss-star"}></i> <span>  {rating} ({ratingCountV2})  </span> </div>
-              {description.length > 140 ? <div>
-                    <span className=''>{ismore ? description : trimDes}</span>
-                    <button className='font-bold'onClick={()=>setIsmore(!ismore)}>{ismore ? "less" : "more"}</button>
-                </div>  : <span className=''>{description}</span>}
-            </div>
-            <div className='w-[20%] relative'>
-              <img className="rounded-xl aspect-square" src={"https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,c_fit/" + imageId} alt="" />
-              <button className='bg-white absolute bottom-[-10px] text-lg text-green-700'>Add</button>
-            </div>
-          </div>
-        </>
-
-      )})}
+      {itemCards.map(({ card : {info} }) => (
+        <DetailMenuCard info={info}/>
+      ))}
     </div>
     <hr className="my-5 " />
     </>
     
   )
 }
+function DetailMenuCard({info : { name, defaultPrice, price, itemAttribute: { vegClassifier }, ratings: { aggregatedRating: { ratingCountV2, rating } }, imageId, description } }) {
+  const [ismore , setIsmore] = useState(false)
+  let trimDes = description.substring(0,130) + "..."
+  return (
+  <>
+    <div className='w-full flex justify-between  min-h-[182px]'>
+      <div className='w-[70%]'>
+        <img className="w-5 rounded-sm" src={vegClassifier == "VEG" ? veg : nonVeg} alt="" srcSet="" />
+        <h2 className="font-bold text-lg">{name}</h2>
+        <p className="font-bold text-lg">
+          ₹{defaultPrice / 100 || price / 100}{" "}
+        </p>
+        <div className="flex items-center gap-1"> <i className={"fi mt-1 text-xl fi-ss-star"}></i> <span>  {rating} ({ratingCountV2})  </span> </div>
+        {description.length > 140 ? <div>
+              <span className=''>{ismore ? description : trimDes}</span>
+              <button className='font-bold'onClick={()=>setIsmore(!ismore)}>{ismore ? "less" : "more"}</button>
+          </div>  : <span className=''>{description}</span>}
+      </div>
+      <div className='w-[20%] relative'>
+        <img className="rounded-xl aspect-square" src={"https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,c_fit/" + imageId} alt="" />
+        <button className='bg-white absolute bottom-[25px] rounded-xl px-4 py-1 ml-9 text-lg text-green-700'>Add</button>
+      </div>
+    </div>
+  </>
+
+)}
 
 function Discount({data : {info : {couponCode,header,offerLogo}}} , id){
-  // console.log(info);
+
   
   return(
     <div className='flex min-w-[328px] h-[76px] border rounded-2xl p-3 gap-2'
@@ -248,26 +254,3 @@ function Discount({data : {info : {couponCode,header,offerLogo}}} , id){
 }
 
 export default RestaurantMenu
-
-
-
-
-
-    // <div>
-    //                         <div className='flex justify-between'>
-    //                           <h1>{title} ({itemCards.length}) </h1>
-    //                           <i className="fi text-xl fi-rr-angle-small-up" onClick={()=> toggle(i)}></i>
-    //                         </div>
-    //                         {
-    //                           currIdx === i && 
-    //                           <div className='m-6'>
-    //                             {
-    //                               itemCards.map(({card : {info }})=> (
-    //                                 <h1>{info?.name}</h1>
-    //                             ))
-    //                             }
-    //                           </div>
-    //                         }
-                            
-                          
-    //                   </div>
