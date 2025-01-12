@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/jsx-key */
-import React, { act, useEffect, useState } from 'react'
+import React, { act, useContext, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { cartContext, coordinates } from '../context/contextApi';
 
 
 let veg =
@@ -19,11 +20,12 @@ function RestaurantMenu() {
   const [topPicksData, setTopPicksData] = useState({})
   const [menuData , setMenuData] = useState([])
   const [currIdx , setCurrIdx] = useState(null)
+  const {cord : {lat , lng}} = useContext(coordinates)
  
   
 
 async function fetchMenu(){
-  const data = await fetch(`https://cors-by-codethread-for-swiggy.vercel.app/cors/dapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=18.9690247&lng=72.8205292&restaurantId=${mainId}&catalog_qa=undefined&submitAction=ENTER`)
+  const data = await fetch(`https://cors-by-codethread-for-swiggy.vercel.app/cors/dapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=${lat}&lng=${lng}&restaurantId=${mainId}&catalog_qa=undefined&submitAction=ENTER`)
   const res = await data.json()
   // console.log(res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards);
   setMenuName(res?.data?.cards[0]?.card?.card?.text)
@@ -34,7 +36,7 @@ async function fetchMenu(){
   
  setMenuData(actualMenu)
  setTopPicksData((res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards).filter((data)=>data?.card?.card?.title == "Top Picks")[0])
-  console.log(res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards);
+  // console.log(res?.data?.cards[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards);
 }
 
   useEffect(()=> {
@@ -139,7 +141,7 @@ async function fetchMenu(){
                     <p>top picks</p>
                     {
                       menuData.map(({card : {card }})=>( 
-                        <MenuCard card={card}/>
+                        <MenuCard card={card} resInfo={resInfo}/>
                       ))
                     }
                   </div>
@@ -153,7 +155,7 @@ async function fetchMenu(){
 
 
 
-function MenuCard({card}){
+function MenuCard({card} , resInfo){
   const {itemCards,title} = card;
 
   let hello = false
@@ -175,7 +177,7 @@ function MenuCard({card}){
        <h1 className={'font-bold text-'+ (card["@type"] ? "xl" : "base")}>{title} </h1>
        <i className={"fi text-xl fi-rr-angle-small-" + (isOpen ? "up" : "down")} onClick={ToggleDropdown}></i>
     </div>
-    {isOpen && <DetailMenu itemCards={itemCards}/>}
+    {isOpen && <DetailMenu itemCards={itemCards} resInfo={resInfo}/>}
     
   </div>
   <hr className={"my-4 border-"+(card["@type"] ? "[7px]" : "[5px]")}></hr>
@@ -188,7 +190,7 @@ function MenuCard({card}){
       <div>
         <h1 className='font-bold text-xl'>{title}</h1>
         {categories.map((data)=>(
-          <MenuCard card={data}/>
+          <MenuCard card={data} resInfo={resInfo}/>
         ))}
 
       </div>
@@ -198,12 +200,12 @@ function MenuCard({card}){
  
 }
 
-function DetailMenu({itemCards}){
+function DetailMenu({itemCards} , resInfo){
   return(
     <>
     <div className='my-5'>
       {itemCards.map(({ card : {info} }) => (
-        <DetailMenuCard info={info}/>
+        <DetailMenuCard info={info} resInfo={resInfo}/>
       ))}
     </div>
     <hr className="my-5 " />
@@ -211,9 +213,29 @@ function DetailMenu({itemCards}){
     
   )
 }
-function DetailMenuCard({info : { name, defaultPrice, price, itemAttribute: { vegClassifier }, ratings: { aggregatedRating: { ratingCountV2, rating } }, imageId, description } }) {
+function DetailMenuCard({info } , resInfo) {
+  const { name, defaultPrice, price, itemAttribute: { vegClassifier }, ratings: { aggregatedRating: { ratingCountV2, rating } }, imageId, description } = info
   const [ismore , setIsmore] = useState(false)
+  const {cartData , setCartData } = useContext(cartContext)
   let trimDes = description.substring(0,130) + "..."
+  function addToCart(){
+    const isAdded = cartData.find((data) => data.id === info.id)
+    let resInfoFromLocatStorage = JSON.parse(localStorage.getItem("resInfo")) || []
+    if(!isAdded) {
+      if(resInfoFromLocatStorage.name === resInfo.name || resInfoFromLocatStorage.length === 0) {
+         setCartData((prev) => [...prev , info]) 
+      localStorage.setItem("cartData", JSON.stringify([...cartData , info ]))
+      localStorage.setItem("resInfo", JSON.stringify(resInfo))
+      }else{
+        alert("Same item of different restaurant")
+      }
+     
+    } else {
+      alert("Item already added to cart")
+    }
+    
+    
+  }
   return (
   <>
     <div className='w-full flex justify-between  min-h-[182px]'>
@@ -231,7 +253,7 @@ function DetailMenuCard({info : { name, defaultPrice, price, itemAttribute: { ve
       </div>
       <div className='w-[20%] relative'>
         <img className="rounded-xl aspect-square" src={"https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,c_fit/" + imageId} alt="" />
-        <button className='bg-white absolute bottom-[25px] rounded-xl px-4 py-1 ml-9 text-lg text-green-700'>Add</button>
+        <button className='bg-white absolute bottom-[25px] rounded-xl px-4 py-1 ml-9 text-lg text-green-700' onClick={addToCart}>Add</button>
       </div>
     </div>
   </>
