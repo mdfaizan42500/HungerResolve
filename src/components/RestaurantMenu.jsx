@@ -227,7 +227,7 @@ function DetailMenuCard({info } , resInfo) {
       localStorage.setItem("cartData", JSON.stringify([...cartData , info ]))
       localStorage.setItem("resInfo", JSON.stringify(resInfo))
       }else{
-        alert("Same item of different restaurant")
+        alert("Different restaurant item already exist!")
       }
      
     } else {

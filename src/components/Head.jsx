@@ -2,6 +2,8 @@ import React, { useContext, useState } from 'react'
 import logo from "../assets/logo.webp"
 import { Link, Outlet } from 'react-router-dom'
 import { cartContext, coordinates, visiblity } from '../context/contextApi'
+import {useDispatch, useSelector} from "react-redux"
+import { toogleSearchBar } from '../utils/ToogleSlice'
 
 function Head() {
   const navItems = [
@@ -38,15 +40,22 @@ function Head() {
     }
     
   ]
-  const {visible , setvisible} = useContext(visiblity)
+
+  const dispatch = useDispatch();
+  // const {visible , setvisible} = useContext(visiblity)
   const [searchData , setSearchData] = useState([])
   const [address , setAddress] = useState("")
   const {setcord} = useContext(coordinates)
   const {cartData , setCartData} = useContext(cartContext)
     
-    
+  const visible = useSelector((state)=> state.ToogleSlice.searchBarToogle) 
+ 
+  
+
+
   function handleVisiblity(){
-    setvisible(prev => !prev)
+    // setvisible(prev => !prev)
+    dispatch(toogleSearchBar())
   }
 
  async function SearchResultFun(value){
@@ -87,10 +96,13 @@ async function fetchLatLng(id){
                               {searchData.map((data,i)=>{
                                 const isLast = (i === searchData.length - 1)
                                 return (
-                                <li onClick={()=>{fetchLatLng(data.place_id)}}>{data?.structured_formatting?.main_text} 
+                                  <div className='flex gap-3'>
+                                    <i className='fi fi-rr-marker mt-1'></i>
+                                <li className='cursor-pointer ' onClick={()=>{fetchLatLng(data.place_id)}}>{data?.structured_formatting?.main_text} 
                                   <p className='text-sm opacity-60'>{data?.structured_formatting?.secondary_text}</p>
-                                  {!isLast && <p>-----------------------------------</p>}
+                                  {!isLast && <p className='line-clamp-1'>-------------------------------</p>}
                                 </li>
+                                </div>
                                 )
                                   })}
                             </ul>

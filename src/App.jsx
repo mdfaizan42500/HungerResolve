@@ -5,9 +5,11 @@ import RestaurantMenu from "./components/RestaurantMenu"
 import { visiblity , coordinates , cartContext} from "./context/contextApi"
 import { useEffect, useState } from "react"
 import Cart from "./components/Cart"
+import { useSelector } from "react-redux"
 
 function App() {  
-  const [visible , setvisible] =useState(false)
+  // const [visible , setvisible] =useState(false)
+   const visible = useSelector((state)=> state.ToogleSlice.searchBarToogle) 
   const [cord , setcord] =useState({ lat: 28.5355161, lng: 77.3910265 })
   const [cartData , setCartData ] =useState([])
   
@@ -23,7 +25,7 @@ function App() {
   return (
     <cartContext.Provider value={{cartData , setCartData}}>
     <coordinates.Provider value={{cord , setcord}}>
-    <visiblity.Provider value={{visible ,setvisible}}>
+    {/* <visiblity.Provider value={{visible ,setvisible}}> */}
         <div className={(visible ? "max-h-screen overflow-hidden" : "")}>
           <Routes>
             <Route path="/" element={<Head/>}>
@@ -35,7 +37,7 @@ function App() {
       
             </Routes>
         </div>
-  </visiblity.Provider>
+  {/* </visiblity.Provider> */}
   </coordinates.Provider>
   </cartContext.Provider>
   )
